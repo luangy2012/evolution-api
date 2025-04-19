@@ -1,6 +1,5 @@
 const { create, ev } = require('@open-wa/wa-automate');
 const express = require('express');
-const fs = require('fs');
 const app = express();
 
 let currentQr = '';
@@ -18,13 +17,13 @@ create({
   console.log('[OK] Bot Evolution iniciado com sucesso.');
 }).catch((err) => console.error('[ERRO] Falha ao iniciar o bot:', err));
 
-// Captura o QR e armazena na memória
+// Salva QR na memória
 ev.on('qr.**', async (qrData) => {
   currentQr = qrData;
   console.log('[QR] QR Code atualizado.');
 });
 
-// Rota visual do QR Code via canvas (sem gerar imagem)
+// Rota para renderizar o QR via canvas (sem toDataURL)
 app.get('/qr', (req, res) => {
   if (!currentQr || currentQr.length < 10) {
     return res.send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
@@ -34,16 +33,27 @@ app.get('/qr', (req, res) => {
     <html>
       <head>
         <title>QR Code - Evolution API</title>
-        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+        <style>
+          body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+          }
+        </style>
       </head>
-      <body style="font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+      <body>
         <h2>Escaneie com o WhatsApp</h2>
-        <canvas id="canvas"></canvas>
+        <canvas id="qr-canvas"></canvas>
         <p>QR gerado com sucesso.</p>
         <script>
-          const qrData = ${JSON.stringify(currentQr)};
-          QRCode.toCanvas(document.getElementById('canvas'), qrData, { errorCorrectionLevel: 'H' }, function (error) {
-            if (error) console.error(error);
+          var qr = new QRious({
+            element: document.getElementById('qr-canvas'),
+            size: 300,
+            value: ${JSON.stringify(currentQr)}
           });
         </script>
       </body>
@@ -51,11 +61,10 @@ app.get('/qr', (req, res) => {
   `);
 });
 
-// Rota de status
 app.get('/docs', (req, res) => {
   res.send(`
-    <h2>Evolution API rodando</h2>
-    <p>Acesse <a href="/qr" target="_blank">/qr</a> para escanear o QR Code do WhatsApp</p>
+    <h2>Evolution API está rodando</h2>
+    <p>Acesse: <a href="/qr" target="_blank">/qr</a> para escanear o QR Code</p>
   `);
 });
 
