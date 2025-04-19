@@ -12,8 +12,8 @@ app.get('/qr', async (req, res) => {
   try {
     await create({
       headless: true,
-      useChrome: true,
       executablePath: '/usr/bin/chromium',
+      useChrome: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -24,10 +24,10 @@ app.get('/qr', async (req, res) => {
         '--single-process',
         '--disable-gpu'
       ],
-      qrTimeout: 0,
-      authTimeout: 60,
       killProcessOnBrowserClose: true,
-      popup: false
+      disableSpins: true,
+      qrTimeout: 0,
+      authTimeout: 60
     }).then(client => {
       res.send('<h2>WhatsApp conectado com sucesso ✅</h2>');
     });
