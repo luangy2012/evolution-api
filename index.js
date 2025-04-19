@@ -20,15 +20,21 @@ create({
   console.log('Bot Evolution iniciado com sucesso.');
 }).catch((err) => console.error('Erro ao iniciar bot:', err));
 
-// Escutando QR
+// Salvar o QR Code em um arquivo quando for gerado
 ev.on('qr.**', async (qrData) => {
   fs.writeFileSync('./last.qr.txt', qrData);
+  console.log('[QR] QR Code atualizado e salvo.');
 });
 
-// Rota para exibir o QR Code
+// Rota para exibir o QR Code visualmente
 app.get('/qr', async (req, res) => {
+  const path = './last.qr.txt';
+  if (!fs.existsSync(path)) {
+    return res.send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
+  }
+
   try {
-    const qr = fs.readFileSync('./last.qr.txt', 'utf-8');
+    const qr = fs.readFileSync(path, 'utf-8');
     const qrImage = await qrcode.toDataURL(qr);
     res.send(`
       <html>
@@ -41,15 +47,15 @@ app.get('/qr', async (req, res) => {
       </html>
     `);
   } catch {
-    res.send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
+    res.send('<p>Erro ao processar QR. Tente novamente em instantes.</p>');
   }
 });
 
-// Rota de verificação
+// Rota de status simples
 app.get('/docs', (req, res) => {
   res.send(`
     <h2>Evolution API ativa</h2>
-    <p>Escaneie seu QR acessando: <a href="https://evolution-api-production-08cc.up.railway.app/qr" target="_blank">/qr</a></p>
+    <p>Para escanear o QR Code do WhatsApp: <a href="https://evolution-api-production-08cc.up.railway.app/qr" target="_blank">/qr</a></p>
   `);
 });
 
