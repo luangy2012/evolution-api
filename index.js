@@ -14,22 +14,31 @@ app.get('/qr', async (req, res) => {
       headless: true,
       executablePath: '/usr/bin/chromium',
       useChrome: true,
+      disableSpins: true,
+      qrTimeout: 0,
+      authTimeout: 60,
+      killProcessOnBrowserClose: true,
+      multiDevice: true,
+      sessionId: undefined, // <- não usa pasta com nome fixo
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
+        '--disable-gpu',
         '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-      ],
-      killProcessOnBrowserClose: true,
-      disableSpins: true,
-      qrTimeout: 0,
-      authTimeout: 60
+        '--disable-accelerated-2d-canvas',
+        '--disable-software-rasterizer',
+        '--no-first-run',
+        '--disable-background-networking',
+        '--disable-default-apps',
+        '--disable-extensions',
+        '--disable-sync',
+        '--metrics-recording-only',
+        '--mute-audio',
+        '--remote-debugging-port=9222'
+      ]
     }).then(client => {
-      res.send('<h2>WhatsApp conectado com sucesso ✅</h2>');
+      res.send('<h2>WhatsApp iniciado com sucesso! ✅</h2>');
     });
   } catch (error) {
     res.send(`<pre>Erro ao iniciar o WhatsApp: ${error}</pre>`);
