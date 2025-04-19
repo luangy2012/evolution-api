@@ -1,7 +1,10 @@
 FROM node:18
 
+# Instala dependências necessárias
 RUN apt-get update && apt-get install -y \
-    chromium \
+    wget \
+    gnupg \
+    ca-certificates \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -16,10 +19,25 @@ RUN apt-get update && apt-get install -y \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
-    xdg-utils
+    xdg-utils \
+    chromium \
+    && apt-get clean
 
+# Cria pasta do app
 WORKDIR /app
+
+# Copia arquivos
 COPY package.json .
+COPY index.js .
+
+# Instala dependências do Node
 RUN npm install
-COPY . .
+
+# Define variáveis de ambiente
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# Porta da aplicação
+EXPOSE 8880
+
+# Comando para iniciar
 CMD ["node", "index.js"]
