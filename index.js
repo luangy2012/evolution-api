@@ -14,12 +14,11 @@ app.get('/qr', async (req, res) => {
       headless: true,
       executablePath: '/usr/bin/chromium',
       useChrome: true,
-      disableSpins: true,
-      qrTimeout: 0,
-      authTimeout: 60,
       killProcessOnBrowserClose: true,
+      qrTimeout: 0,
+      authTimeout: 300, // 5 minutos
+      sessionId: undefined,
       multiDevice: true,
-      sessionId: undefined, // <- não usa pasta com nome fixo
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -38,10 +37,10 @@ app.get('/qr', async (req, res) => {
         '--remote-debugging-port=9222'
       ]
     }).then(client => {
-      res.send('<h2>WhatsApp iniciado com sucesso! ✅</h2>');
+      res.send('<h2>WhatsApp iniciado com sucesso! ✅ Escaneie o QR no console.</h2>');
     });
   } catch (error) {
-    res.send(`<pre>Erro ao iniciar o WhatsApp: ${error}</pre>`);
+    res.send(`<pre>Erro ao iniciar o WhatsApp:\n\n${error}</pre>`);
   }
 });
 
