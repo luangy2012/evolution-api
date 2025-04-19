@@ -1,52 +1,60 @@
-const express = require("express");
-const { create, ev } = require("@open-wa/wa-automate");
+const express = require('express');
+const { create, ev } = require('@open-wa/wa-automate');
+const QRCode = require('qrcode');
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-let qrCodeBase64 = "";
+let qrCodeBase64 = '';
 
-app.get("/", (req, res) => {
-  res.send("API Evolution está online ✅");
+app.get('/', (req, res) => {
+  res.send('API Evolution está online ✅');
 });
 
-app.get("/qr", async (req, res) => {
+app.get('/qr', async (req, res) => {
   if (!qrCodeBase64) {
-    return res.send("<h2>Aguardando geração do QR Code...</h2>");
+    return res.send('<h2>QR Code ainda não gerado. Aguarde alguns segundos...</h2>');
   }
-  res.send(`
-    <h2>Escaneie o QR Code para conectar:</h2>
-    <img src="data:image/png;base64,${qrCodeBase64}" />
-  `);
+
+  const html = `
+    <h2>Escaneie o QR Code abaixo para autenticar no WhatsApp:</h2>
+    <img src="${qrCodeBase64}" style="width:300px;height:300px;" />
+  `;
+  res.send(html);
 });
 
 create({
   sessionId: "evolution",
   multiDevice: true,
-  authTimeout: 60,
-  blockCrashLogs: true,
-  disableSpins: true,
   headless: true,
-  qrTimeout: 0,
-  popup: false,
   useChrome: true,
-  killProcessOnBrowserClose: true,
-  args: ["--no-sandbox"],
-}).then((client) => start(client));
+  qrTimeout: 0,
+  authTimeout: 60,
+  popup: false,
+  disableSpins: true,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-accelerated-2d-canvas',
+    '--no-first-run',
+    '--no-zygote',
+    '--single-process',
+    '--disable-gpu'
+  ]
+}).then(async (client) => {
+  console.log('WhatsApp conectado com sucesso ✅');
+}).catch((err) => {
+  console.error('Erro ao iniciar o WhatsApp:', err);
+});
 
-function start(client) {
-  console.log("Bot iniciado com sucesso!");
-}
-
-ev.on("qr.**", async (qrcode) => {
+ev.on('qr.**', async (qr) => {
   try {
-    const QRCode = require("qrcode");
-    qrCodeBase64 = await QRCode.toDataURL(qrcode, { errorCorrectionLevel: 'L' });
-    console.log("QR Code gerado com sucesso!");
-  } catch (err) {
-    console.error("Erro ao gerar QR Code:", err.message);
+    qrCodeBase64 = await QRCode.toDataURL(qr);
+    console.log('QR Code gerado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao gerar QR Code:', error.message);
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
