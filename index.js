@@ -17,13 +17,11 @@ create({
   console.log('[OK] Bot Evolution iniciado com sucesso.');
 }).catch((err) => console.error('[ERRO] Falha ao iniciar o bot:', err));
 
-// Salva QR na memória
 ev.on('qr.**', async (qrData) => {
   currentQr = qrData;
   console.log('[QR] QR Code atualizado.');
 });
 
-// Rota para renderizar o QR via canvas (sem toDataURL)
 app.get('/qr', (req, res) => {
   if (!currentQr || currentQr.length < 10) {
     return res.send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
@@ -33,7 +31,7 @@ app.get('/qr', (req, res) => {
     <html>
       <head>
         <title>QR Code - Evolution API</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
         <style>
           body {
             font-family: sans-serif;
@@ -42,6 +40,13 @@ app.get('/qr', (req, res) => {
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
+          }
+          canvas {
+            image-rendering: pixelated;
+            width: 90vw;
+            max-width: 400px;
+            height: auto;
           }
         </style>
       </head>
@@ -50,10 +55,14 @@ app.get('/qr', (req, res) => {
         <canvas id="qr-canvas"></canvas>
         <p>QR gerado com sucesso.</p>
         <script>
-          var qr = new QRious({
-            element: document.getElementById('qr-canvas'),
-            size: 300,
-            value: ${JSON.stringify(currentQr)}
+          const qrData = ${JSON.stringify(currentQr)};
+          const canvas = document.getElementById('qr-canvas');
+          QRCode.toCanvas(canvas, qrData, {
+            errorCorrectionLevel: 'H',
+            scale: 12,
+            margin: 2
+          }, function (error) {
+            if (error) console.error(error);
           });
         </script>
       </body>
@@ -62,10 +71,7 @@ app.get('/qr', (req, res) => {
 });
 
 app.get('/docs', (req, res) => {
-  res.send(`
-    <h2>Evolution API está rodando</h2>
-    <p>Acesse: <a href="/qr" target="_blank">/qr</a> para escanear o QR Code</p>
-  `);
+  res.send(`<h2>Evolution API rodando</h2><p>Acesse <a href="/qr">/qr</a> para escanear</p>`);
 });
 
 const PORT = process.env.PORT || 8880;
