@@ -1,10 +1,9 @@
 const { create, ev } = require('@open-wa/wa-automate');
-const qrcode = require('qrcode');
 const express = require('express');
 const fs = require('fs');
 const app = express();
 
-let clientInstance = null;
+let currentQr = '';
 
 create({
   sessionId: 'evolution',
@@ -16,50 +15,40 @@ create({
   executablePath: process.env.CHROME_PATH,
   args: ['--no-sandbox', '--disable-setuid-sandbox']
 }).then((client) => {
-  clientInstance = client;
   console.log('[OK] Bot Evolution iniciado com sucesso.');
 }).catch((err) => console.error('[ERRO] Falha ao iniciar o bot:', err));
 
-// Salva o QR Code sempre que for gerado
+// Captura o QR e armazena na memória
 ev.on('qr.**', async (qrData) => {
-  try {
-    fs.writeFileSync('./last.qr.txt', qrData);
-    console.log('[QR] QR Code atualizado e salvo.');
-  } catch (err) {
-    console.error('[ERRO] Falha ao salvar QR Code:', err);
-  }
+  currentQr = qrData;
+  console.log('[QR] QR Code atualizado.');
 });
 
-// Rota segura para exibir o QR
-app.get('/qr', async (req, res) => {
-  try {
-    const path = './last.qr.txt';
-    if (!fs.existsSync(path)) {
-      return res.status(202).send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
-    }
-
-    const qrRaw = fs.readFileSync(path, 'utf-8');
-
-    if (!qrRaw || qrRaw.length < 10) {
-      return res.status(204).send('<p style="font-family:sans-serif;">QR Code inválido ou ainda carregando...</p>');
-    }
-
-    const qrImage = await qrcode.toDataURL(qrRaw, { errorCorrectionLevel: 'H' });
-
-    return res.send(`
-      <html>
-        <head><title>QR Code - Evolution API</title></head>
-        <body style="font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
-          <h2>Escaneie com o WhatsApp</h2>
-          <img src="${qrImage}" style="width:300px;height:300px;" />
-          <p>QR gerado com sucesso.</p>
-        </body>
-      </html>
-    `);
-  } catch (error) {
-    console.error('[ERRO] na rota /qr:', error);
-    return res.status(500).send('<p style="font-family:sans-serif;">Erro interno. Tente novamente em instantes.</p>');
+// Rota visual do QR Code via canvas (sem gerar imagem)
+app.get('/qr', (req, res) => {
+  if (!currentQr || currentQr.length < 10) {
+    return res.send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
   }
+
+  res.send(`
+    <html>
+      <head>
+        <title>QR Code - Evolution API</title>
+        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+      </head>
+      <body style="font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+        <h2>Escaneie com o WhatsApp</h2>
+        <canvas id="canvas"></canvas>
+        <p>QR gerado com sucesso.</p>
+        <script>
+          const qrData = ${JSON.stringify(currentQr)};
+          QRCode.toCanvas(document.getElementById('canvas'), qrData, { errorCorrectionLevel: 'H' }, function (error) {
+            if (error) console.error(error);
+          });
+        </script>
+      </body>
+    </html>
+  `);
 });
 
 // Rota de status
