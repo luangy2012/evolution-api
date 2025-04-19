@@ -1,60 +1,57 @@
-const express = require('express');
 const { create, ev } = require('@open-wa/wa-automate');
-const QRCode = require('qrcode');
-
+const qrcode = require('qrcode');
+const express = require('express');
+const fs = require('fs');
 const app = express();
-const PORT = process.env.PORT || 8080;
 
-let qrCodeBase64 = '';
-
-app.get('/', (req, res) => {
-  res.send('API Evolution está online ✅');
-});
-
-app.get('/qr', async (req, res) => {
-  if (!qrCodeBase64) {
-    return res.send('<h2>QR Code ainda não gerado. Aguarde alguns segundos...</h2>');
-  }
-
-  const html = `
-    <h2>Escaneie o QR Code abaixo para autenticar no WhatsApp:</h2>
-    <img src="${qrCodeBase64}" style="width:300px;height:300px;" />
-  `;
-  res.send(html);
-});
+let clientInstance = null;
 
 create({
-  sessionId: "evolution",
+  sessionId: 'evolution',
   multiDevice: true,
   headless: true,
-  useChrome: true,
   qrTimeout: 0,
-  authTimeout: 60,
-  popup: false,
-  disableSpins: true,
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-accelerated-2d-canvas',
-    '--no-first-run',
-    '--no-zygote',
-    '--single-process',
-    '--disable-gpu'
-  ]
-}).then(async (client) => {
-  console.log('WhatsApp conectado com sucesso ✅');
-}).catch((err) => {
-  console.error('Erro ao iniciar o WhatsApp:', err);
+  authTimeout: 0,
+  useChrome: true,
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+}).then((client) => {
+  clientInstance = client;
+  console.log('Bot Evolution iniciado com sucesso.');
+}).catch((err) => console.error('Erro ao iniciar bot:', err));
+
+// Salvar QR em arquivo
+ev.on('qr.**', async (qrData) => {
+  fs.writeFileSync('./last.qr.txt', qrData);
 });
 
-ev.on('qr.**', async (qr) => {
+// Rota para exibir o QR
+app.get('/qr', async (req, res) => {
   try {
-    qrCodeBase64 = await QRCode.toDataURL(qr);
-    console.log('QR Code gerado com sucesso!');
-  } catch (error) {
-    console.error('Erro ao gerar QR Code:', error.message);
+    const qr = fs.readFileSync('./last.qr.txt', 'utf-8');
+    const qrImage = await qrcode.toDataURL(qr);
+    res.send(`
+      <html>
+        <head><title>QR Code - Evolution API</title></head>
+        <body style="font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+          <h2>Escaneie com o WhatsApp</h2>
+          <img src="${qrImage}" style="width:300px;height:300px;" />
+          <p>QR gerado com sucesso. Acesse este link sempre que precisar reconectar.</p>
+        </body>
+      </html>
+    `);
+  } catch {
+    res.send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
   }
 });
 
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+// Rota de verificação
+app.get('/docs', (req, res) => {
+  res.send(`
+    <h2>Evolution API ativa</h2>
+    <p>Escaneie seu QR acessando: <a href="https://evolution-api-production-08cc.up.railway.app/qr" target="_blank">/qr</a></p>
+  `);
+});
+
+app.listen(8880, () => {
+  console.log('Servidor rodando em: https://evolution-api-production-08cc.up.railway.app');
+});
