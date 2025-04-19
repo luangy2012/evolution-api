@@ -1,13 +1,13 @@
 {
   "name": "evolution-api",
   "version": "1.0.0",
-  "description": "API WhatsApp com OpenWA para Railway",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@open-wa/wa-automate": "^4.36.6",
+    "@open-wa/wa-automate": "^4.34.3",
     "express": "^4.18.2"
   }
 }
