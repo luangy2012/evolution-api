@@ -13,18 +13,19 @@ create({
   qrTimeout: 0,
   authTimeout: 0,
   useChrome: true,
+  executablePath: process.env.CHROME_PATH,
   args: ['--no-sandbox', '--disable-setuid-sandbox']
 }).then((client) => {
   clientInstance = client;
   console.log('Bot Evolution iniciado com sucesso.');
 }).catch((err) => console.error('Erro ao iniciar bot:', err));
 
-// Salvar QR em arquivo
+// Escutando QR
 ev.on('qr.**', async (qrData) => {
   fs.writeFileSync('./last.qr.txt', qrData);
 });
 
-// Rota para exibir o QR
+// Rota para exibir o QR Code
 app.get('/qr', async (req, res) => {
   try {
     const qr = fs.readFileSync('./last.qr.txt', 'utf-8');
@@ -35,7 +36,7 @@ app.get('/qr', async (req, res) => {
         <body style="font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
           <h2>Escaneie com o WhatsApp</h2>
           <img src="${qrImage}" style="width:300px;height:300px;" />
-          <p>QR gerado com sucesso. Acesse este link sempre que precisar reconectar.</p>
+          <p>QR gerado com sucesso.</p>
         </body>
       </html>
     `);
