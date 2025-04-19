@@ -1,5 +1,6 @@
 const express = require('express');
 const { create, ev } = require('@open-wa/wa-automate');
+const QRCode = require('qrcode');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -12,7 +13,7 @@ app.get('/', (req, res) => {
 app.get('/qr', (req, res) => {
   if (qrCodeBase64) {
     res.send(`
-      <h2>Escaneie o QR Code abaixo:</h2>
+      <h2>Escaneie o QR Code abaixo para conectar:</h2>
       <img src="${qrCodeBase64}" />
     `);
   } else {
@@ -23,14 +24,14 @@ app.get('/qr', (req, res) => {
 create({
   sessionId: "evolution",
   multiDevice: true,
+  headless: true,
   authTimeout: 60,
   qrTimeout: 0,
-  headless: true,
-  useChrome: true,
   popup: false,
   disableSpins: true,
   logConsole: false,
   killProcessOnBrowserClose: true,
+  useChrome: true,
   chromiumArgs: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -40,10 +41,7 @@ create({
     '--no-zygote',
     '--single-process',
     '--disable-gpu'
-  ],
-  qrRefreshS: 15,
-  qrLogSkip: false,
-  throwErrorOnTosBlock: false
+  ]
 }).then(client => {
   console.log('WhatsApp conectado com sucesso!');
 }).catch(error => {
@@ -51,7 +49,7 @@ create({
 });
 
 ev.on('qr.**', async (qrcode, sessionId) => {
-  qrCodeBase64 = await ev.qrCode(qrcode, { type: 'image' });
+  qrCodeBase64 = await QRCode.toDataURL(qrcode);
 });
-
+ 
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
