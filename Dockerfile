@@ -1,8 +1,7 @@
 FROM node:18
 
-# Instala dependências necessárias para o Chromium funcionar
-RUN apt-get update && \
-    apt-get install -y \
+# Instala o Chromium e dependências
+RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
     libappindicator3-1 \
