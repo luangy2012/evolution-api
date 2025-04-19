@@ -20,7 +20,7 @@ create({
   console.log('[OK] Bot Evolution iniciado com sucesso.');
 }).catch((err) => console.error('[ERRO] Falha ao iniciar o bot:', err));
 
-// Salvar o QR Code
+// Salva o QR Code sempre que for gerado
 ev.on('qr.**', async (qrData) => {
   try {
     fs.writeFileSync('./last.qr.txt', qrData);
@@ -33,17 +33,18 @@ ev.on('qr.**', async (qrData) => {
 // Rota segura para exibir o QR
 app.get('/qr', async (req, res) => {
   try {
-    if (!fs.existsSync('./last.qr.txt')) {
+    const path = './last.qr.txt';
+    if (!fs.existsSync(path)) {
       return res.status(202).send('<p style="font-family:sans-serif;">QR Code ainda não gerado. Aguarde alguns segundos...</p>');
     }
 
-    const qrRaw = fs.readFileSync('./last.qr.txt', 'utf-8');
+    const qrRaw = fs.readFileSync(path, 'utf-8');
 
     if (!qrRaw || qrRaw.length < 10) {
       return res.status(204).send('<p style="font-family:sans-serif;">QR Code inválido ou ainda carregando...</p>');
     }
 
-    const qrImage = await qrcode.toDataURL(qrRaw);
+    const qrImage = await qrcode.toDataURL(qrRaw, { errorCorrectionLevel: 'H' });
 
     return res.send(`
       <html>
@@ -61,11 +62,11 @@ app.get('/qr', async (req, res) => {
   }
 });
 
-// Rota de verificação
+// Rota de status
 app.get('/docs', (req, res) => {
   res.send(`
     <h2>Evolution API rodando</h2>
-    <p>Acesse <a href="/qr" target="_blank">/qr</a> para escanear o código</p>
+    <p>Acesse <a href="/qr" target="_blank">/qr</a> para escanear o QR Code do WhatsApp</p>
   `);
 });
 
