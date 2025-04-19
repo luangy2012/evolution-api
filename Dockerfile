@@ -1,6 +1,5 @@
 FROM node:18
 
-# Instalação do Chromium e dependências
 RUN apt-get update && apt-get install -y \
   chromium \
   chromium-driver \
