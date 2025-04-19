@@ -1,14 +1,17 @@
 {
   "name": "evolution-api",
   "version": "1.0.0",
-  "description": "API de WhatsApp usando @open-wa/wa-automate",
+  "description": "API WhatsApp com OpenWA e QR Code visual",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@open-wa/wa-automate": "^4.76.0",
     "express": "^4.18.2",
-    "qrcode": "^1.5.2"
+    "qrcode": "^1.5.1"
   }
 }
