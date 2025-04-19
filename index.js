@@ -14,12 +14,22 @@ app.get('/qr', async (req, res) => {
       multiDevice: true,
       headless: true,
       useChrome: true,
+      executablePath: "/usr/bin/chromium",
       qrTimeout: 0,
       popup: false,
       disableSpins: true,
       authTimeout: 60,
-      executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      killProcessOnBrowserClose: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-zygote',
+        '--disable-gpu',
+        '--single-process',
+        '--disable-extensions'
+      ]
     }).then(client => res.send('<h1>WhatsApp conectado ✅</h1>'));
   } catch (err) {
     res.send(`<pre>Erro ao iniciar: ${err}</pre>`);
