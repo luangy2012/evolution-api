@@ -1,9 +1,9 @@
 FROM node:18
 
-# Instalar dependências do Chromium
+# Instalar o Chromium via APT (mais estável e seguro)
 RUN apt-get update && apt-get install -y \
-  wget \
-  unzip \
+  chromium \
+  chromium-driver \
   gnupg \
   ca-certificates \
   fonts-liberation \
@@ -23,13 +23,6 @@ RUN apt-get update && apt-get install -y \
   xdg-utils \
   --no-install-recommends && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Baixar e instalar o Chromium corretamente
-RUN wget https://storage.googleapis.com/chromium-browser-snapshots/Linux_x64/1182810/chrome-linux.zip && \
-    unzip chrome-linux.zip && \
-    mv chrome-linux/chrome /usr/bin/chromium && \
-    chmod +x /usr/bin/chromium && \
-    rm -rf chrome-linux chrome-linux.zip
 
 ENV CHROME_PATH="/usr/bin/chromium"
 
