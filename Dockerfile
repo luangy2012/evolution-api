@@ -1,6 +1,5 @@
 FROM node:18
 
-# Instala dependências do sistema
 RUN apt-get update && \
     apt-get install -y chromium && \
     apt-get install -y fonts-liberation libappindicator3-1 libasound2 libatk-bridge2.0-0 \
