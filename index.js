@@ -1,5 +1,6 @@
 const express = require('express');
 const { create } = require('@open-wa/wa-automate');
+
 const app = express();
 const PORT = process.env.PORT || 8880;
 
@@ -10,14 +11,8 @@ app.get('/', (req, res) => {
 app.get('/qr', async (req, res) => {
   try {
     await create({
-      sessionId: "evolution",
-      multiDevice: true,
       headless: true,
       useChrome: true,
-      qrTimeout: 0,
-      popup: false,
-      disableSpins: true,
-      authTimeout: 60,
       executablePath: '/usr/bin/chromium',
       args: [
         '--no-sandbox',
@@ -26,25 +21,19 @@ app.get('/qr', async (req, res) => {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--disable-gpu',
         '--single-process',
-        '--disable-extensions',
-        '--aggressive-cache-discard',
-        '--disable-cache',
-        '--disable-application-cache',
-        '--disable-offline-load-stale-cache',
-        '--disk-cache-size=0'
+        '--disable-gpu'
       ],
+      qrTimeout: 0,
+      authTimeout: 60,
       killProcessOnBrowserClose: true,
-      chromiumArgs: ['--no-sandbox']
-    }).then(() => {
-      res.send(`<h2>QR Code gerado com sucesso ✅<br>Acesse via terminal ou app com o número vinculado.</h2>`);
+      popup: false
+    }).then(client => {
+      res.send('<h2>WhatsApp conectado com sucesso ✅</h2>');
     });
-  } catch (err) {
-    res.send(`<pre>Erro ao iniciar o WhatsApp: ${err}</pre>`);
+  } catch (error) {
+    res.send(`<pre>Erro ao iniciar o WhatsApp: ${error}</pre>`);
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
