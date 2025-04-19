@@ -28,8 +28,10 @@ app.get('/qr', (req, res) => {
   }
 
   res.send(`
+    <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="UTF-8" />
         <title>QR Code - Evolution API</title>
         <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
         <style>
@@ -41,12 +43,13 @@ app.get('/qr', (req, res) => {
             justify-content: center;
             height: 100vh;
             margin: 0;
+            background: #fff;
           }
           canvas {
-            image-rendering: pixelated;
             width: 90vw;
             max-width: 400px;
             height: auto;
+            image-rendering: pixelated;
           }
         </style>
       </head>
@@ -54,15 +57,20 @@ app.get('/qr', (req, res) => {
         <h2>Escaneie com o WhatsApp</h2>
         <canvas id="qr-canvas"></canvas>
         <p>QR gerado com sucesso.</p>
+
         <script>
-          const qrData = ${JSON.stringify(currentQr)};
-          const canvas = document.getElementById('qr-canvas');
-          QRCode.toCanvas(canvas, qrData, {
-            errorCorrectionLevel: 'H',
-            scale: 12,
-            margin: 2
-          }, function (error) {
-            if (error) console.error(error);
+          document.addEventListener("DOMContentLoaded", function () {
+            const qrData = ${JSON.stringify(currentQr)};
+            const canvas = document.getElementById('qr-canvas');
+            if (canvas && qrData) {
+              QRCode.toCanvas(canvas, qrData, {
+                errorCorrectionLevel: 'H',
+                scale: 10,
+                margin: 1
+              }, function (err) {
+                if (err) console.error("Erro ao gerar QR:", err);
+              });
+            }
           });
         </script>
       </body>
