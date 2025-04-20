@@ -1,15 +1,16 @@
 {
-  "name": "evolution-api-production-08cc",
+  "name": "wa-qr-multidevice",
   "version": "1.0.0",
-  "description": "API de WhatsApp com QR Code via Open-WA e Express, pronta para Railway",
+  "description": "Projeto Node.js para gerar QR Code do WhatsApp (multi-device) usando @open-wa/wa-automate.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@open-wa/wa-automate": "^4.76.0",
+    "@open-wa/wa-automate": "^4.30.0",
     "express": "^4.18.2",
-    "fs": "0.0.1-security",
-    "qrcode": "^1.5.1"
+    "puppeteer": "^19.8.0",
+    "jimp": "^0.22.6",
+    "jsqr": "^1.4.0"
   }
 }
