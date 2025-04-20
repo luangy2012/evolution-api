@@ -33,7 +33,6 @@ app.get('/qr', (req, res) => {
       <head>
         <meta charset="UTF-8" />
         <title>QR Code - Evolution API</title>
-        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
         <style>
           body {
             font-family: sans-serif;
@@ -43,7 +42,6 @@ app.get('/qr', (req, res) => {
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background: #fff;
           }
           canvas {
             width: 90vw;
@@ -57,7 +55,9 @@ app.get('/qr', (req, res) => {
         <h2>Escaneie com o WhatsApp</h2>
         <canvas id="qr-canvas"></canvas>
         <p>QR gerado com sucesso.</p>
-
+        <script>
+          ${require('fs').readFileSync(require.resolve('qrcode/build/qrcode.min.js'), 'utf-8')}
+        </script>
         <script>
           document.addEventListener("DOMContentLoaded", function () {
             const qrData = ${JSON.stringify(currentQr)};
