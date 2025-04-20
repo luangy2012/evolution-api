@@ -42,6 +42,7 @@ app.get('/qr', (req, res) => {
             justify-content: center;
             height: 100vh;
             margin: 0;
+            background: #fff;
           }
           canvas {
             width: 90vw;
@@ -55,9 +56,13 @@ app.get('/qr', (req, res) => {
         <h2>Escaneie com o WhatsApp</h2>
         <canvas id="qr-canvas"></canvas>
         <p>QR gerado com sucesso.</p>
+
+        <!-- Script QRCode embutido manualmente -->
         <script>
-          ${require('fs').readFileSync(require.resolve('qrcode/build/qrcode.min.js'), 'utf-8')}
+          /*! QRCode.js v1.0.0 - https://github.com/soldair/node-qrcode */
+          ${require('fs').readFileSync(__dirname + '/public/qrcode.min.js', 'utf8')}
         </script>
+
         <script>
           document.addEventListener("DOMContentLoaded", function () {
             const qrData = ${JSON.stringify(currentQr)};
